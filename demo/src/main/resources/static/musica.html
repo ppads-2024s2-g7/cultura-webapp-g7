@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gerenciamento de Músicas</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+</head>
+
+<body>
+    <h1>Gerenciamento de Músicas</h1>
+
+    <table id="tabelaFormulario">    
+        <tr> <td>ID:</td> <td><input type="text" id="txtId" disabled></td> </tr>
+        <tr> <td>Nome:</td> <td><input type="text" id="txtNome"></td> </tr>
+        <tr> <td>Duração:</td> <td><input type="text" id="txtDuracao"></td> </tr>
+        <tr> <td>Cantor:</td> <td><input type="text" id="txtCantor"></td> </tr>
+        <tr> <td>Produtor:</td> <td><input type="text" id="txtProdutor"></td> </tr>
+        <tr> <td>Ano de Lançamento:</td> <td><input type="number" id="txtAnoLancamento"></td> </tr>
+        <tr><td></td><td>
+            <input type="button" value="Salvar" onclick="salvarMusica()" id="btnSalvar">
+            <input type="button" value="Apagar" onclick="apagarMusica()" id="btnApagar">
+            <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
+        </td></tr>
+    </table> 
+    
+    <p style="font-weight:bold" id="paragrafoMensagem"></p>
+    
+    <table id="tabelaMusicas">  
+        <tr><td><input type="button" value="Novo" onclick="novoMusica()" id="btnNovo"></td></tr>
+        <tr> <th>ID</th> <th>Nome</th> <th>Duração</th> <th>Cantor</th> <th>Produtor</th> <th>Ano de Lançamento</th> </tr>
+        <tbody id="corpoTabelaMusicas"> </tbody>
+    </table>
+    
+    <script src="musica-rest.js"></script>
+    <script>
+        const corpoTabela = document.querySelector('#corpoTabelaMusicas');
+        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+        const txtNome = document.querySelector('#txtNome');
+        const txtDuracao = document.querySelector('#txtDuracao');
+        const txtCantor = document.querySelector('#txtCantor');
+        const txtProdutor = document.querySelector('#txtProdutor');
+        const txtAnoLancamento = document.querySelector('#txtAnoLancamento');
+        const txtId = document.querySelector('#txtId');
+        
+        let criandoNovaMusica = false;
+        
+        inicializar();
+
+        function inicializar() {
+            criandoNovaMusica = false;
+            paragrafoMensagem.textContent = 'Pressione o botão Novo ou selecione uma música da lista:';
+            limparFormulario();
+            
+            listarTodasMusicas();            
+        }
+
+        function limparFormulario() {
+            txtId.value = '';
+            txtNome.value = '';
+            txtDuracao.value = '';
+            txtCantor.value = '';
+            txtProdutor.value = '';
+            txtAnoLancamento.value = '';
+        }
+
+        function listarTodasMusicas() {
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao listar músicas (código " + error.message + ")";
+            };
+            asyncLerMusicas(preencherTabela, errorHandler);
+        }
+        
+        function preencherTabela(musicas) {
+            corpoTabela.innerHTML = "";
+            musicas.forEach(m => {
+                let linha = corpoTabela.insertRow();
+                linha.insertCell().innerHTML = `<a href="javascript:void(0)" onclick="selecionarMusica(${m.id})">${m.id}</a>`;
+                linha.insertCell().textContent = m.nome;
+                linha.insertCell().textContent = m.duracao;
+                linha.insertCell().textContent = m.cantor;
+                linha.insertCell().textContent = m.produtor;
+                linha.insertCell().textContent = m.anoLancamento;
+            });
+        }
+        
+        function selecionarMusica(id) {
+            criandoNovaMusica = false;
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao selecionar música (código " + error.message + ")";
+            };
+            asyncLerMusicaById(id, preencherFormulario, errorHandler);				
+        }
+            
+        function preencherFormulario(musica) {
+            paragrafoMensagem.textContent = 'Altere e salve os dados da música, ou então apague o registro.';
+            txtId.value = musica.id;
+            txtNome.value = musica.nome;
+            txtDuracao.value = musica.duracao;
+            txtCantor.value = musica.cantor;
+            txtProdutor.value = musica.produtor;
+            txtAnoLancamento.value = musica.anoLancamento;
+            
+            txtNome.disabled = false;
+            txtDuracao.disabled = false;
+            txtCantor.disabled = false;
+            txtProdutor.disabled = false;
+            txtAnoLancamento.disabled = false;
+            
+            document.querySelector('#btnNovo').disabled = true;
+            document.querySelector('#btnSalvar').disabled = false;
+            document.querySelector('#btnApagar').disabled = false;
+            document.querySelector('#btnCancelar').disabled = false;  
+        }
+
+        function novoMusica() {
+            paragrafoMensagem.textContent = 'Preencha os dados da nova música...';
+            criandoNovaMusica = true;
+            limparFormulario();
+            
+            txtNome.disabled = false;
+            txtDuracao.disabled = false;
+            txtCantor.disabled = false;
+            txtProdutor.disabled = false;
+            txtAnoLancamento.disabled = false;
+            
+            document.querySelector('#btnNovo').disabled = true;
+            document.querySelector('#btnSalvar').disabled = false;
+            document.querySelector('#btnApagar').disabled = true;
+            document.querySelector('#btnCancelar').disabled = false;
+        }
+        
+        function salvarMusica() {
+            if (criandoNovaMusica) {
+                criarMusica();
+            } else {
+                alterarMusica();
+            }
+        }
+        
+        function criarMusica() {
+            const dadosMusica = {
+                'nome': txtNome.value,
+                'duracao': txtDuracao.value,
+                'cantor': txtCantor.value,
+                'produtor': txtProdutor.value,
+                'anoLancamento': parseInt(txtAnoLancamento.value)
+            };
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao criar nova música (código ' + error.message + ')'; 
+            };
+            asyncCriarMusica(dadosMusica, inicializar, errorHandler);
+        }
+        
+        function alterarMusica() {
+            const dadosMusica = {
+                'id': parseInt(txtId.value),
+                'nome': txtNome.value,
+                'duracao': txtDuracao.value,
+                'cantor': txtCantor.value,
+                'produtor': txtProdutor.value,
+                'anoLancamento': parseInt(txtAnoLancamento.value)
+            };
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao alterar música (código ' + error.message + ')'; 
+            };
+            asyncAlterarMusica(dadosMusica, inicializar, errorHandler);
+        }
+        
+        function apagarMusica() {
+            const id = parseInt(txtId.value);
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao apagar música (código ' + error.message + ')'; 
+            };
+            asyncApagarMusica(id, inicializar, errorHandler);
+        }
+
+        function cancelarEdicao() {
+            inicializar();
+        }
+    </script>
+</body>
+</html>
