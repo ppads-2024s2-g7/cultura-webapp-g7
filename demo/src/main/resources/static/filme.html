@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Filmes</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+</head>
+
+<body>
+    <h1>Gerenciamento de Filmes</h1>
+
+    <table id="tabelaFormulario">    
+        <tr> <td>ID:</td> <td><input type="text" id="txtId"></td> </tr>
+        <tr> <td>Título:</td> <td><input type="text" id="txtTitulo"></td> </tr>
+        <tr> <td>Ano:</td> <td><input type="text" id="txtAno"></td> </tr>
+        <tr> <td>Gênero:</td> <td><input type="text" id="txtGenero"></td> </tr> 
+        <tr><td></td><td>
+            <input type="button" value="Salvar" onclick="salvarFilme()" id="btnSalvar">
+            <input type="button" value="Apagar" onclick="apagarFilme()" id="btnApagar">
+            <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
+        </td></tr>
+    </table> 
+    
+    <p style="font-weight:bold" id="paragrafoMensagem"></p>
+    
+    <table id="tabelaFilmes">  
+        <tr><td><input type="button" value="Novo" onclick="novoFilme()" id="btnNovo"></td> <td></td> <td></td></tr>
+        <tr> <th>ID</th> <th>Título</th> <th>Ano</th> <th>Gênero</th> </tr>
+        <tbody id="corpoTabelaFilmes"> </tbody>
+    </table>
+    
+    <script src="filmes-rest.js"></script>
+    <script>
+        const tabelaFilmes = document.querySelector('#tabelaFilmes');
+        const tabelaFormulario = document.querySelector('#tabelaFormulario');
+        const corpoTabela = document.querySelector('#corpoTabelaFilmes');
+        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+        const txtTitulo = document.querySelector('#txtTitulo');
+        const txtAno = document.querySelector('#txtAno');
+        const txtGenero = document.querySelector('#txtGenero');
+        const txtId = document.querySelector('#txtId');
+        
+        const btnNovo = document.querySelector('#btnNovo');
+        const btnSalvar = document.querySelector('#btnSalvar');
+        const btnApagar = document.querySelector('#btnApagar');
+        const btnCancelar = document.querySelector('#btnCancelar');
+        var criandoNovoFilme = false;
+        
+        inicializar();
+
+        function inicializar() {
+            criandoNovoFilme = false;
+            paragrafoMensagem.textContent = 'Pressione o botão Novo ou selecione um filme da lista:';
+            txtId.value = '';
+            txtTitulo.value = '';
+            txtAno.value = '';
+            txtGenero.value = '';
+            txtId.disabled = true;
+            txtTitulo.disabled = true;
+            txtAno.disabled = true;
+            txtGenero.disabled = true;
+            
+            btnNovo.disabled = false;
+            btnSalvar.disabled = true;
+            btnApagar.disabled = true;
+            btnCancelar.disabled = true;
+            
+            tabelaFormulario.style.display = 'none';
+            tabelaFilmes.style.display = 'inline';
+            
+            listarTodosFilmes();            
+        }
+
+        function listarTodosFilmes() {
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao listar filmes (código " + error.message + ")";
+            }
+            asyncLerFilmes(preencherTabela, errorHandler);
+        }
+        
+        function preencherTabela(filmes) {
+            corpoTabela.innerHTML = "";
+            var n = filmes.length;
+            for (var i = 0; i < n; i++) {
+                let f = filmes[i];
+                let linha = corpoTabela.insertRow();
+                let celulaId = linha.insertCell();
+                let celulaTitulo = linha.insertCell();
+                let celulaAno = linha.insertCell();
+                let celulaGenero = linha.insertCell();
+                
+                let alink = document.createElement('a');
+                alink.textContent = f.id;
+                alink.href = "javascript:void(0)";
+                alink.onclick = function() { selecionarFilme(f.id); };
+                celulaId.appendChild(alink);
+                celulaTitulo.textContent = f.titulo;
+                celulaAno.textContent = f.ano;
+                celulaGenero.textContent = f.genero;
+            }
+        }
+        
+        function selecionarFilme(id) {
+            criandoNovoFilme = false;
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao selecionar filme (código " + error.message + ")";
+            }
+            asyncLerFilmeById(id, preencherFormulario, errorHandler);				
+        }
+            
+        function preencherFormulario(filme) {
+            paragrafoMensagem.textContent = 'Altere e salve os dados do filme, ou então apague o registro do filme.';
+            txtId.value = filme.id;
+            txtTitulo.value = filme.titulo;
+            txtAno.value = filme.ano;
+            txtGenero.value = filme.genero;
+            
+            txtId.disabled = true;
+            txtTitulo.disabled = false;
+            txtAno.disabled = false;
+            txtGenero.disabled = false;
+            
+            btnNovo.disabled = true;
+            btnSalvar.disabled = false;
+            btnApagar.disabled = false;
+            btnCancelar.disabled = false;  
+            
+            tabelaFormulario.style.display = 'inline';
+            tabelaFilmes.style.display = 'none';
+        }
+
+        function novoFilme() {
+            paragrafoMensagem.textContent = 'Preencha os dados do novo filme...';
+            criandoNovoFilme = true;
+            
+            txtId.value = '';
+            txtTitulo.value = '';
+            txtAno.value = '';
+            txtGenero.value = '';
+            
+            txtId.disabled = true;
+            txtTitulo.disabled = false;
+            txtAno.disabled = false;
+            txtGenero.disabled = false;
+            
+            btnNovo.disabled = true;
+            btnSalvar.disabled = false;
+            btnApagar.disabled = true;
+            btnCancelar.disabled = false;
+            
+            tabelaFormulario.style.display = 'inline';
+            tabelaFilmes.style.display = 'none';
+        }
+        
+        function salvarFilme() {
+            if (criandoNovoFilme) {
+                criarFilme();
+            } else {
+                alterarFilme();
+            }
+        }
+        
+        function criarFilme() {
+            const dadosFilme = {
+                'titulo': txtTitulo.value,
+                'ano': txtAno.value,
+                'genero': txtGenero.value
+            };
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao criar novo filme (código ' + error.message + ')'; 
+            }
+            asyncCriarFilme(dadosFilme, inicializar, errorHandler);
+        }
+        
+        function alterarFilme() {
+            const errorHandler = function(error) {
+                paragrafoMensagem.textContent = 'Erro ao alterar filme (código ' + error.message + ')'; 
+            }
+            const dadosFilme = {
+                'id': txtId.value,
+                'titulo': txtTitulo.value,
+                'ano': txtAno.value,
+                'genero': txtGenero.value
+            };
+            asyncAlterarFilme(dadosFilme, inicializar, errorHandler);        	
+        }
+        
+        function cancelarEdicao() {
+            inicializar();
+        }
+        
+        function apagarFilme() {
+            const id = txtId.value;
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao apagar filme (código ' + error.message + ')'; 
+            } 
+            asyncApagarFilme(id, inicializar, errorHandler);       		
+        }
+        
+    </script>    
+</body>
+
+</html>
