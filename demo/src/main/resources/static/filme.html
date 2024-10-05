@@ -12,8 +12,9 @@
 
     <table id="tabelaFormulario">    
         <tr> <td>ID:</td> <td><input type="text" id="txtId"></td> </tr>
-        <tr> <td>Título:</td> <td><input type="text" id="txtTitulo"></td> </tr>
-        <tr> <td>Ano:</td> <td><input type="text" id="txtAno"></td> </tr>
+        <tr> <td>Nome:</td> <td><input type="text" id="txtNome"></td> </tr>
+        <tr> <td>Tempo de Duração:</td> <td><input type="text" id="txtTempoDeDuracao"></td> </tr>
+        <tr> <td>Ano de Lançamento:</td> <td><input type="number" id="txtAnoLancamento"></td> </tr>
         <tr> <td>Gênero:</td> <td><input type="text" id="txtGenero"></td> </tr> 
         <tr><td></td><td>
             <input type="button" value="Salvar" onclick="salvarFilme()" id="btnSalvar">
@@ -26,7 +27,7 @@
     
     <table id="tabelaFilmes">  
         <tr><td><input type="button" value="Novo" onclick="novoFilme()" id="btnNovo"></td> <td></td> <td></td></tr>
-        <tr> <th>ID</th> <th>Título</th> <th>Ano</th> <th>Gênero</th> </tr>
+        <tr> <th>ID</th> <th>Nome</th> <th>Tempo de Duração</th> <th>Ano de Lançamento</th> <th>Gênero</th> </tr>
         <tbody id="corpoTabelaFilmes"> </tbody>
     </table>
     
@@ -36,8 +37,9 @@
         const tabelaFormulario = document.querySelector('#tabelaFormulario');
         const corpoTabela = document.querySelector('#corpoTabelaFilmes');
         const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
-        const txtTitulo = document.querySelector('#txtTitulo');
-        const txtAno = document.querySelector('#txtAno');
+        const txtNome = document.querySelector('#txtNome');
+        const txtTempoDeDuracao = document.querySelector('#txtTempoDeDuracao');
+        const txtAnoLancamento = document.querySelector('#txtAnoLancamento');
         const txtGenero = document.querySelector('#txtGenero');
         const txtId = document.querySelector('#txtId');
         
@@ -53,12 +55,14 @@
             criandoNovoFilme = false;
             paragrafoMensagem.textContent = 'Pressione o botão Novo ou selecione um filme da lista:';
             txtId.value = '';
-            txtTitulo.value = '';
-            txtAno.value = '';
+            txtNome.value = '';
+            txtTempoDeDuracao.value = '';
+            txtAnoLancamento.value = '';
             txtGenero.value = '';
             txtId.disabled = true;
-            txtTitulo.disabled = true;
-            txtAno.disabled = true;
+            txtNome.disabled = true;
+            txtTempoDeDuracao.disabled = true;
+            txtAnoLancamento.disabled = true;
             txtGenero.disabled = true;
             
             btnNovo.disabled = false;
@@ -86,8 +90,9 @@
                 let f = filmes[i];
                 let linha = corpoTabela.insertRow();
                 let celulaId = linha.insertCell();
-                let celulaTitulo = linha.insertCell();
-                let celulaAno = linha.insertCell();
+                let celulaNome = linha.insertCell();
+                let celulaTempoDeDuracao = linha.insertCell();
+                let celulaAnoLancamento = linha.insertCell();
                 let celulaGenero = linha.insertCell();
                 
                 let alink = document.createElement('a');
@@ -95,8 +100,9 @@
                 alink.href = "javascript:void(0)";
                 alink.onclick = function() { selecionarFilme(f.id); };
                 celulaId.appendChild(alink);
-                celulaTitulo.textContent = f.titulo;
-                celulaAno.textContent = f.ano;
+                celulaNome.textContent = f.nome;
+                celulaTempoDeDuracao.textContent = f.tempoDeDuracao;
+                celulaAnoLancamento.textContent = f.anoLancamento;
                 celulaGenero.textContent = f.genero;
             }
         }
@@ -112,13 +118,15 @@
         function preencherFormulario(filme) {
             paragrafoMensagem.textContent = 'Altere e salve os dados do filme, ou então apague o registro do filme.';
             txtId.value = filme.id;
-            txtTitulo.value = filme.titulo;
-            txtAno.value = filme.ano;
+            txtNome.value = filme.nome;
+            txtTempoDeDuracao.value = filme.tempoDeDuracao;
+            txtAnoLancamento.value = filme.anoLancamento;
             txtGenero.value = filme.genero;
             
             txtId.disabled = true;
-            txtTitulo.disabled = false;
-            txtAno.disabled = false;
+            txtNome.disabled = false;
+            txtTempoDeDuracao.disabled = false;
+            txtAnoLancamento.disabled = false;
             txtGenero.disabled = false;
             
             btnNovo.disabled = true;
@@ -135,13 +143,15 @@
             criandoNovoFilme = true;
             
             txtId.value = '';
-            txtTitulo.value = '';
-            txtAno.value = '';
+            txtNome.value = '';
+            txtTempoDeDuracao.value = '';
+            txtAnoLancamento.value = '';
             txtGenero.value = '';
             
             txtId.disabled = true;
-            txtTitulo.disabled = false;
-            txtAno.disabled = false;
+            txtNome.disabled = false;
+            txtTempoDeDuracao.disabled = false;
+            txtAnoLancamento.disabled = false;
             txtGenero.disabled = false;
             
             btnNovo.disabled = true;
@@ -163,8 +173,9 @@
         
         function criarFilme() {
             const dadosFilme = {
-                'titulo': txtTitulo.value,
-                'ano': txtAno.value,
+                'nome': txtNome.value,
+                'tempoDeDuracao': txtTempoDeDuracao.value,
+                'anoLancamento': parseInt(txtAnoLancamento.value, 10),
                 'genero': txtGenero.value
             };
             const errorHandler = function(error) { 
@@ -178,9 +189,10 @@
                 paragrafoMensagem.textContent = 'Erro ao alterar filme (código ' + error.message + ')'; 
             }
             const dadosFilme = {
-                'id': txtId.value,
-                'titulo': txtTitulo.value,
-                'ano': txtAno.value,
+                'id': parseInt(txtId.value, 10),
+                'nome': txtNome.value,
+                'tempoDeDuracao': txtTempoDeDuracao.value,
+                'anoLancamento': parseInt(txtAnoLancamento.value, 10),
                 'genero': txtGenero.value
             };
             asyncAlterarFilme(dadosFilme, inicializar, errorHandler);        	
