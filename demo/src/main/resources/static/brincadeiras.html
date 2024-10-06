@@ -2,223 +2,189 @@
 <html>
 
 <head>
-    <title>Filmes</title>
+    <title>Gerenciamento de Brincadeiras</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
 </head>
 
 <body>
-    <h1>Gerenciamento de Filmes</h1>
+    <h1>Gerenciamento de Brincadeiras</h1>
 
-    <table id="tabelaFormulario">
-        <tr> <td>ID:</td> <td><input type="text" id="txtId"></td> </tr>
+    <table id="tabelaFormulario">    
         <tr> <td>Nome:</td> <td><input type="text" id="txtNome"></td> </tr>
-        <tr> <td>Tempo de Duração:</td> <td><input type="text" id="txtTempoDeDuracao"></td> </tr>
-        <tr> <td>Ano de Lançamento:</td> <td><input type="number" id="txtAnoLancamento"></td> </tr>
-        <tr> <td>Gênero:</td> <td><input type="text" id="txtGenero"></td> </tr>
+        <tr> <td>Quantidade Mínima de Jogadores:</td> <td><input type="number" id="txtQtdeMinima"></td> </tr>
+        <tr> <td>Quantidade Máxima de Jogadores:</td> <td><input type="number" id="txtQtdeMaxima"></td> </tr>
+        <tr> <td>Habilidade Principal:</td> <td><input type="text" id="txtHabilidadePrincipal"></td> </tr>
         <tr><td></td><td>
-            <input type="button" value="Salvar" onclick="salvarFilme()" id="btnSalvar">
-            <input type="button" value="Apagar" onclick="apagarFilme()" id="btnApagar">
+            <input type="button" value="Salvar" onclick="salvarBrincadeira()" id="btnSalvar">
+            <input type="button" value="Apagar" onclick="apagarBrincadeira()" id="btnApagar">
             <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
         </td></tr>
-    </table>
-
+    </table> 
+    
     <p style="font-weight:bold" id="paragrafoMensagem"></p>
-
-    <table id="tabelaFilmes">
-        <tr><td><input type="button" value="Novo" onclick="novoFilme()" id="btnNovo"></td> <td></td> <td></td></tr>
-        <tr> <th>ID</th> <th>Nome</th> <th>Tempo de Duração</th> <th>Ano de Lançamento</th> <th>Gênero</th> </tr>
-        <tbody id="corpoTabelaFilmes"> </tbody>
+    
+    <table id="tabelaBrincadeiras">  
+        <tr><td><input type="button" value="Novo" onclick="novaBrincadeira()" id="btnNovo"></td> <td></td> <td></td></tr>
+        <tr> <th>Nome</th> <th>Quantidade Mínima</th> <th>Quantidade Máxima</th> <th>Habilidade Principal</th> </tr>
+        <tbody id="corpoTabelaBrincadeiras"> </tbody>
     </table>
-
-    <script src="filme-rest.js"></script>
+    
+    <script src="brincadeiras-rest.js"></script>
     <script>
-        const tabelaFilmes = document.querySelector('#tabelaFilmes');
+        const tabelaBrincadeiras = document.querySelector('#tabelaBrincadeiras');
         const tabelaFormulario = document.querySelector('#tabelaFormulario');
-        const corpoTabela = document.querySelector('#corpoTabelaFilmes');
+        const corpoTabela = document.querySelector('#corpoTabelaBrincadeiras');
         const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
         const txtNome = document.querySelector('#txtNome');
-        const txtTempoDeDuracao = document.querySelector('#txtTempoDeDuracao');
-        const txtAnoLancamento = document.querySelector('#txtAnoLancamento');
-        const txtGenero = document.querySelector('#txtGenero');
-        const txtId = document.querySelector('#txtId');
-
+        const txtQtdeMinima = document.querySelector('#txtQtdeMinima');
+        const txtQtdeMaxima = document.querySelector('#txtQtdeMaxima');
+        const txtHabilidadePrincipal = document.querySelector('#txtHabilidadePrincipal');
+        
         const btnNovo = document.querySelector('#btnNovo');
         const btnSalvar = document.querySelector('#btnSalvar');
         const btnApagar = document.querySelector('#btnApagar');
         const btnCancelar = document.querySelector('#btnCancelar');
-        let criandoNovoFilme = false;
+        var criandoNovaBrincadeira = false;
 
         inicializar();
 
-        async function inicializar() {
-            criandoNovoFilme = false;
-            paragrafoMensagem.textContent = 'Pressione o botão Novo ou selecione um filme da lista:';
-            txtId.value = '';
-            txtNome.value = '';
-            txtTempoDeDuracao.value = '';
-            txtAnoLancamento.value = '';
-            txtGenero.value = '';
-            txtId.disabled = true;
-            txtNome.disabled = true;
-            txtTempoDeDuracao.disabled = true;
-            txtAnoLancamento.disabled = true;
-            txtGenero.disabled = true;
+        function inicializar() {
+            criandoNovaBrincadeira = false;
+            paragrafoMensagem.textContent = 'Pressione o botão Novo ou selecione uma brincadeira da lista:';
+            limparCampos();
 
             btnNovo.disabled = false;
             btnSalvar.disabled = true;
             btnApagar.disabled = true;
             btnCancelar.disabled = true;
-
+            
             tabelaFormulario.style.display = 'none';
-            tabelaFilmes.style.display = 'inline';
-
-            await listarTodosFilmes();
+            tabelaBrincadeiras.style.display = 'inline';
+            
+            listarTodasBrincadeiras();            
         }
 
-        async function listarTodosFilmes() {
-            try {
-                const filmes = await asyncLerFilmes();
-                preencherTabela(filmes);
-            } catch (error) {
-                paragrafoMensagem.textContent = "Erro ao listar filmes (código " + error.message + ")";
+        function limparCampos() {
+            txtNome.value = '';
+            txtQtdeMinima.value = '';
+            txtQtdeMaxima.value = '';
+            txtHabilidadePrincipal.value = '';
+        }
+
+        function listarTodasBrincadeiras() {
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao listar brincadeiras (código " + error.message + ")"; 
             }
+            asyncLerBrincadeiras(preencherTabela, errorHandler);
         }
-
-        function preencherTabela(filmes) {
+        
+        function preencherTabela(brincadeiras) {
             corpoTabela.innerHTML = "";
-            filmes.forEach(filme => {
+            for (let b of brincadeiras) {
                 let linha = corpoTabela.insertRow();
-                let celulaId = linha.insertCell();
                 let celulaNome = linha.insertCell();
-                let celulaTempoDeDuracao = linha.insertCell();
-                let celulaAnoLancamento = linha.insertCell();
-                let celulaGenero = linha.insertCell();
-
+                let celulaQtdeMinima = linha.insertCell();
+                let celulaQtdeMaxima = linha.insertCell();
+                let celulaHabilidadePrincipal = linha.insertCell();
+                
                 let alink = document.createElement('a');
-                alink.textContent = filme.id;
+                alink.textContent = b.nome;
                 alink.href = "javascript:void(0)";
-                alink.onclick = () => selecionarFilme(filme.id);
-                celulaId.appendChild(alink);
-                celulaNome.textContent = filme.nome;
-                celulaTempoDeDuracao.textContent = filme.tempoDeDuracao;
-                celulaAnoLancamento.textContent = filme.anoLancamento;
-                celulaGenero.textContent = filme.genero;
-            });
-        }
-
-        async function selecionarFilme(id) {
-            criandoNovoFilme = false;
-            try {
-                const filme = await asyncLerFilmeById(id);
-                preencherFormulario(filme);
-            } catch (error) {
-                paragrafoMensagem.textContent = "Erro ao selecionar filme (código " + error.message + ")";
+                alink.onclick = function() { selecionarBrincadeira(b.nome); };
+                celulaNome.appendChild(alink);
+                celulaQtdeMinima.textContent = b.qtdeMinimaJogadores;
+                celulaQtdeMaxima.textContent = b.qtdeMaximaJogadores;
+                celulaHabilidadePrincipal.textContent = b.habilidadePrincipal;
             }
         }
-
-        function preencherFormulario(filme) {
-            paragrafoMensagem.textContent = 'Altere e salve os dados do filme, ou então apague o registro do filme.';
-            txtId.value = filme.id;
-            txtNome.value = filme.nome;
-            txtTempoDeDuracao.value = filme.tempoDeDuracao;
-            txtAnoLancamento.value = filme.anoLancamento;
-            txtGenero.value = filme.genero;
-
-            txtId.disabled = true;
-            txtNome.disabled = false;
-            txtTempoDeDuracao.disabled = false;
-            txtAnoLancamento.disabled = false;
-            txtGenero.disabled = false;
+        
+        function selecionarBrincadeira(nome) {
+            criandoNovaBrincadeira = false;
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao selecionar brincadeira (código " + error.message + ")"; 
+            }
+            asyncLerBrincadeiraByNome(nome, preencherFormulario, errorHandler);				
+        }
+            
+        function preencherFormulario(brincadeira) {
+            paragrafoMensagem.textContent = 'Altere e salve os dados da brincadeira, ou então apague o registro da brincadeira.';
+            txtNome.value = brincadeira.nome;
+            txtQtdeMinima.value = brincadeira.qtdeMinimaJogadores;
+            txtQtdeMaxima.value = brincadeira.qtdeMaximaJogadores;
+            txtHabilidadePrincipal.value = brincadeira.habilidadePrincipal;
 
             btnNovo.disabled = true;
             btnSalvar.disabled = false;
             btnApagar.disabled = false;
-            btnCancelar.disabled = false;
-
+            btnCancelar.disabled = false;  
+            
             tabelaFormulario.style.display = 'inline';
-            tabelaFilmes.style.display = 'none';
+            tabelaBrincadeiras.style.display = 'none';
         }
 
-        function novoFilme() {
-            paragrafoMensagem.textContent = 'Preencha os dados do novo filme...';
-            criandoNovoFilme = true;
+        function novaBrincadeira() {
+            paragrafoMensagem.textContent = 'Preencha os dados da nova brincadeira...';
+            criandoNovaBrincadeira = true;
 
-            txtId.value = '';
-            txtNome.value = '';
-            txtTempoDeDuracao.value = '';
-            txtAnoLancamento.value = '';
-            txtGenero.value = '';
-
-            txtId.disabled = true;
-            txtNome.disabled = false;
-            txtTempoDeDuracao.disabled = false;
-            txtAnoLancamento.disabled = false;
-            txtGenero.disabled = false;
-
+            limparCampos();
+            
             btnNovo.disabled = true;
             btnSalvar.disabled = false;
             btnApagar.disabled = true;
             btnCancelar.disabled = false;
-
+            
             tabelaFormulario.style.display = 'inline';
-            tabelaFilmes.style.display = 'none';
+            tabelaBrincadeiras.style.display = 'none';
         }
-
-        async function salvarFilme() {
-            if (criandoNovoFilme) {
-                await criarFilme();
+        
+        function salvarBrincadeira() {
+            if (criandoNovaBrincadeira) {
+                criarBrincadeira();
             } else {
-                await alterarFilme();
+                alterarBrincadeira();
             }
         }
-
-        async function criarFilme() {
-            const dadosFilme = {
+        
+        function criarBrincadeira() {
+            const dadosBrincadeira = {
                 'nome': txtNome.value,
-                'tempoDeDuracao': txtTempoDeDuracao.value,
-                'anoLancamento': parseInt(txtAnoLancamento.value, 10),
-                'genero': txtGenero.value
+                'qtdeMinimaJogadores': parseInt(txtQtdeMinima.value, 10),
+                'qtdeMaximaJogadores': parseInt(txtQtdeMaxima.value, 10),
+                'habilidadePrincipal': txtHabilidadePrincipal.value
             };
-            try {
-                await asyncCriarFilme(dadosFilme);
-                inicializar();
-            } catch (error) {
-                paragrafoMensagem.textContent = 'Erro ao criar novo filme (código ' + error.message + ')';
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao criar nova brincadeira (código ' + error.message + ')'; 
             }
+            asyncCriarBrincadeira(dadosBrincadeira, inicializar, errorHandler);
         }
-
-        async function alterarFilme() {
-            const dadosFilme = {
-                'id': parseInt(txtId.value, 10),
+        
+        function alterarBrincadeira() {
+            const errorHandler = function(error) {
+                paragrafoMensagem.textContent = 'Erro ao alterar brincadeira (código ' + error.message + ')'; 
+            }
+            const dadosBrincadeira = {
                 'nome': txtNome.value,
-                'tempoDeDuracao': txtTempoDeDuracao.value,
-                'anoLancamento': parseInt(txtAnoLancamento.value, 10),
-                'genero': txtGenero.value
+                'qtdeMinimaJogadores': parseInt(txtQtdeMinima.value, 10),
+                'qtdeMaximaJogadores': parseInt(txtQtdeMaxima.value, 10),
+                'habilidadePrincipal': txtHabilidadePrincipal.value
             };
-            try {
-                await asyncAlterarFilme(dadosFilme);
-                inicializar();
-            } catch (error) {
-                paragrafoMensagem.textContent = 'Erro ao alterar filme (código ' + error.message + ')';
-            }
+            asyncAlterarBrincadeira(dadosBrincadeira, inicializar, errorHandler);        	
         }
-
+        
         function cancelarEdicao() {
             inicializar();
         }
-
-        async function apagarFilme() {
-            const id = txtId.value;
-            try {
-                await asyncApagarFilme(id);
-                inicializar();
-            } catch (error) {
-                paragrafoMensagem.textContent = 'Erro ao apagar filme (código ' + error.message + ')';
-            }
+        
+        function apagarBrincadeira() {
+            const nome = txtNome.value;
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao apagar brincadeira (código ' + error.message + ')'; 
+            } 
+            asyncApagarBrincadeira(nome, inicializar, errorHandler);       		
         }
-
-    </script>
+        
+    </script>    
 </body>
 
 </html>
