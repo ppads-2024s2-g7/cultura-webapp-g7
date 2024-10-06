@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Filmes</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+</head>
+
+<body>
+    <h1>Gerenciamento de Filmes</h1>
+
+    <table id="tabelaFormulario">
+        <tr> <td>ID:</td> <td><input type="text" id="txtId"></td> </tr>
+        <tr> <td>Nome:</td> <td><input type="text" id="txtNome"></td> </tr>
+        <tr> <td>Tempo de Duração:</td> <td><input type="text" id="txtTempoDeDuracao"></td> </tr>
+        <tr> <td>Ano de Lançamento:</td> <td><input type="number" id="txtAnoLancamento"></td> </tr>
+        <tr> <td>Gênero:</td> <td><input type="text" id="txtGenero"></td> </tr>
+        <tr><td></td><td>
+            <input type="button" value="Salvar" onclick="salvarFilme()" id="btnSalvar">
+            <input type="button" value="Apagar" onclick="apagarFilme()" id="btnApagar">
+            <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
+        </td></tr>
+    </table>
+
+    <p style="font-weight:bold" id="paragrafoMensagem"></p>
+
+    <table id="tabelaFilmes">
+        <tr><td><input type="button" value="Novo" onclick="novoFilme()" id="btnNovo"></td> <td></td> <td></td></tr>
+        <tr> <th>ID</th> <th>Nome</th> <th>Tempo de Duração</th> <th>Ano de Lançamento</th> <th>Gênero</th> </tr>
+        <tbody id="corpoTabelaFilmes"> </tbody>
+    </table>
+
+    <script src="filme-rest.js"></script>
+    <script>
+        const tabelaFilmes = document.querySelector('#tabelaFilmes');
+        const tabelaFormulario = document.querySelector('#tabelaFormulario');
+        const corpoTabela = document.querySelector('#corpoTabelaFilmes');
+        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+        const txtNome = document.querySelector('#txtNome');
+        const txtTempoDeDuracao = document.querySelector('#txtTempoDeDuracao');
+        const txtAnoLancamento = document.querySelector('#txtAnoLancamento');
+        const txtGenero = document.querySelector('#txtGenero');
+        const txtId = document.querySelector('#txtId');
+
+        const btnNovo = document.querySelector('#btnNovo');
+        const btnSalvar = document.querySelector('#btnSalvar');
+        const btnApagar = document.querySelector('#btnApagar');
+        const btnCancelar = document.querySelector('#btnCancelar');
+        let criandoNovoFilme = false;
+
+        inicializar();
+
+        async function inicializar() {
+            criandoNovoFilme = false;
+            paragrafoMensagem.textContent = 'Pressione o botão Novo ou selecione um filme da lista:';
+            txtId.value = '';
+            txtNome.value = '';
+            txtTempoDeDuracao.value = '';
+            txtAnoLancamento.value = '';
+            txtGenero.value = '';
+            txtId.disabled = true;
+            txtNome.disabled = true;
+            txtTempoDeDuracao.disabled = true;
+            txtAnoLancamento.disabled = true;
+            txtGenero.disabled = true;
+
+            btnNovo.disabled = false;
+            btnSalvar.disabled = true;
+            btnApagar.disabled = true;
+            btnCancelar.disabled = true;
+
+            tabelaFormulario.style.display = 'none';
+            tabelaFilmes.style.display = 'inline';
+
+            await listarTodosFilmes();
+        }
+
+        async function listarTodosFilmes() {
+            try {
+                const filmes = await asyncLerFilmes();
+                preencherTabela(filmes);
+            } catch (error) {
+                paragrafoMensagem.textContent = "Erro ao listar filmes (código " + error.message + ")";
+            }
+        }
+
+        function preencherTabela(filmes) {
+            corpoTabela.innerHTML = "";
+            filmes.forEach(filme => {
+                let linha = corpoTabela.insertRow();
+                let celulaId = linha.insertCell();
+                let celulaNome = linha.insertCell();
+                let celulaTempoDeDuracao = linha.insertCell();
+                let celulaAnoLancamento = linha.insertCell();
+                let celulaGenero = linha.insertCell();
+
+                let alink = document.createElement('a');
+                alink.textContent = filme.id;
+                alink.href = "javascript:void(0)";
+                alink.onclick = () => selecionarFilme(filme.id);
+                celulaId.appendChild(alink);
+                celulaNome.textContent = filme.nome;
+                celulaTempoDeDuracao.textContent = filme.tempoDeDuracao;
+                celulaAnoLancamento.textContent = filme.anoLancamento;
+                celulaGenero.textContent = filme.genero;
+            });
+        }
+
+        async function selecionarFilme(id) {
+            criandoNovoFilme = false;
+            try {
+                const filme = await asyncLerFilmeById(id);
+                preencherFormulario(filme);
+            } catch (error) {
+                paragrafoMensagem.textContent = "Erro ao selecionar filme (código " + error.message + ")";
+            }
+        }
+
+        function preencherFormulario(filme) {
+            paragrafoMensagem.textContent = 'Altere e salve os dados do filme, ou então apague o registro do filme.';
+            txtId.value = filme.id;
+            txtNome.value = filme.nome;
+            txtTempoDeDuracao.value = filme.tempoDeDuracao;
+            txtAnoLancamento.value = filme.anoLancamento;
+            txtGenero.value = filme.genero;
+
+            txtId.disabled = true;
+            txtNome.disabled = false;
+            txtTempoDeDuracao.disabled = false;
+            txtAnoLancamento.disabled = false;
+            txtGenero.disabled = false;
+
+            btnNovo.disabled = true;
+            btnSalvar.disabled = false;
+            btnApagar.disabled = false;
+            btnCancelar.disabled = false;
+
+            tabelaFormulario.style.display = 'inline';
+            tabelaFilmes.style.display = 'none';
+        }
+
+        function novoFilme() {
+            paragrafoMensagem.textContent = 'Preencha os dados do novo filme...';
+            criandoNovoFilme = true;
+
+            txtId.value = '';
+            txtNome.value = '';
+            txtTempoDeDuracao.value = '';
+            txtAnoLancamento.value = '';
+            txtGenero.value = '';
+
+            txtId.disabled = true;
+            txtNome.disabled = false;
+            txtTempoDeDuracao.disabled = false;
+            txtAnoLancamento.disabled = false;
+            txtGenero.disabled = false;
+
+            btnNovo.disabled = true;
+            btnSalvar.disabled = false;
+            btnApagar.disabled = true;
+            btnCancelar.disabled = false;
+
+            tabelaFormulario.style.display = 'inline';
+            tabelaFilmes.style.display = 'none';
+        }
+
+        async function salvarFilme() {
+            if (criandoNovoFilme) {
+                await criarFilme();
+            } else {
+                await alterarFilme();
+            }
+        }
+
+        async function criarFilme() {
+            const dadosFilme = {
+                'nome': txtNome.value,
+                'tempoDeDuracao': txtTempoDeDuracao.value,
+                'anoLancamento': parseInt(txtAnoLancamento.value, 10),
+                'genero': txtGenero.value
+            };
+            try {
+                await asyncCriarFilme(dadosFilme);
+                inicializar();
+            } catch (error) {
+                paragrafoMensagem.textContent = 'Erro ao criar novo filme (código ' + error.message + ')';
+            }
+        }
+
+        async function alterarFilme() {
+            const dadosFilme = {
+                'id': parseInt(txtId.value, 10),
+                'nome': txtNome.value,
+                'tempoDeDuracao': txtTempoDeDuracao.value,
+                'anoLancamento': parseInt(txtAnoLancamento.value, 10),
+                'genero': txtGenero.value
+            };
+            try {
+                await asyncAlterarFilme(dadosFilme);
+                inicializar();
+            } catch (error) {
+                paragrafoMensagem.textContent = 'Erro ao alterar filme (código ' + error.message + ')';
+            }
+        }
+
+        function cancelarEdicao() {
+            inicializar();
+        }
+
+        async function apagarFilme() {
+            const id = txtId.value;
+            try {
+                await asyncApagarFilme(id);
+                inicializar();
+            } catch (error) {
+                paragrafoMensagem.textContent = 'Erro ao apagar filme (código ' + error.message + ')';
+            }
+        }
+
+    </script>
+</body>
+
+</html>
