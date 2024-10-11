@@ -15,4 +15,9 @@ public class CompanyInvestor extends Investor {
 
   @Column(unique = true)
   private String lei;
+
+  public Iterable<CompanyInvestor> findCompanyInvestorsByNamePart(String string) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'findCompanyInvestorsByNamePart'");
+  }
 }
