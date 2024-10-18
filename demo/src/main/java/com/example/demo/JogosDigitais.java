@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="JogosDigitais")
-public class JogosDigitais {
+public class JogosDigitais extends ItemCultural{
 
 	@Id @GeneratedValue
 	private long id;
