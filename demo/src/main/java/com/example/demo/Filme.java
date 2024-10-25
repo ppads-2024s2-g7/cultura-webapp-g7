@@ -3,16 +3,12 @@ package com.example.demo;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name="filme")
 public class Filme extends ItemCultural{
 
 	@Id @GeneratedValue
 	private long id;
-
-	private String nome;
     private String tempoDeDuracao;
     private int anoLancamento;
     private String genero;
@@ -20,19 +16,7 @@ public class Filme extends ItemCultural{
 	public Filme() {
 		super();
 	}
-
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
-	public String getNome() {
-		return nome;
-	}
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+	
 	public String getTempoDeDuracao() {
 		return tempoDeDuracao;
 	}
