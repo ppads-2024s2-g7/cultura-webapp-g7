@@ -10,7 +10,6 @@ public class JogosDigitais extends ItemCultural{
 	@Id @GeneratedValue
 	private long id;
 
-	private String nome;
 	private int idadeMinima;
     private int qtdeMinimaJogadores;
     private int qtdeMaximaJogadores;
