@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Geeks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+    </style>
+    <script>
+        // Função para buscar e exibir todos os geeks
+        async function fetchGeeks() {
+            const response = await fetch('/api/geeks');
+            const geeks = await response.json();
+            const tableBody = document.getElementById('geeksTableBody');
+            tableBody.innerHTML = '';
+
+            geeks.forEach(geek => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${geek.id}</td>
+                    <td>${geek.username}</td>
+                    <td>${geek.email}</td>
+                    <td>
+                        <button onclick="editGeek(${geek.id})">Editar</button>
+                        <button onclick="deleteGeek(${geek.id})">Deletar</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Função para adicionar um novo geek
+        async function addGeek() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+
+            await fetch('/api/geeks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email })
+            });
+
+            document.getElementById('username').value = '';
+            document.getElementById('email').value = '';
+            fetchGeeks();
+        }
+
+        // Função para deletar um geek
+        async function deleteGeek(id) {
+            await fetch(`/api/geeks/${id}`, { method: 'DELETE' });
+            fetchGeeks();
+        }
+
+        // Função para editar um geek (preenche o formulário)
+        async function editGeek(id) {
+            const response = await fetch(`/api/geeks/${id}`);
+            const geek = await response.json();
+            document.getElementById('username').value = geek.username;
+            document.getElementById('email').value = geek.email;
+            document.getElementById('geekId').value = geek.id;
+        }
+
+        // Função para atualizar o geek no banco de dados
+        async function updateGeek() {
+            const id = document.getElementById('geekId').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+
+            await fetch(`/api/geeks/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, username, email })
+            });
+
+            document.getElementById('username').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('geekId').value = '';
+            fetchGeeks();
+        }
+
+        // Inicializar a lista de geeks ao carregar a página
+        window.onload = fetchGeeks;
+    </script>
+</head>
+<body>
+
+<h2>Gerenciamento de Geeks</h2>
+
+<!-- Tabela para listar os geeks -->
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="geeksTableBody">
+        <!-- Conteúdo dinâmico da tabela -->
+    </tbody>
+</table>
+
+<h3>Adicionar ou Editar Geek</h3>
+
+<!-- Formulário para adicionar/editar geek -->
+<form onsubmit="event.preventDefault(); document.getElementById('geekId').value ? updateGeek() : addGeek();">
+    <input type="hidden" id="geekId">
+    <label for="username">Nome:</label>
+    <input type="text" id="username" required>
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+    <button type="submit">Salvar</button>
+</form>
+
+</body>
+</html>
