@@ -8,4 +8,3 @@
         "id": 1 
     }
 }
-    git push --set-upstream origin Gabriel-avaliacao
