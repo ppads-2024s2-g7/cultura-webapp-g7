@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Avaliações</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Gerenciamento de Avaliações</h1>
+
+        <!-- Formulário para adicionar/atualizar avaliação -->
+        <div class="card mb-4">
+            <div class="card-header">Nova Avaliação</div>
+            <div class="card-body">
+                <form th:action="@{/avaliacoes}" th:object="${avaliacao}" method="post">
+                    <div class="mb-3">
+                        <label for="nota" class="form-label">Nota</label>
+                        <input type="number" class="form-control" th:field="*{nota}" required min="0" max="10" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="texto" class="form-label">Texto</label>
+                        <textarea class="form-control" th:field="*{texto}" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="geek" class="form-label">Geek ID</label>
+                        <input type="number" class="form-control" th:field="*{geek.id}" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="itemCultural" class="form-label">Item Cultural ID</label>
+                        <input type="number" class="form-control" th:field="*{itemCultural.id}" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Avaliação</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabela de avaliações -->
+        <div class="card">
+            <div class="card-header">Avaliações Cadastradas</div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nota</th>
+                            <th>Texto</th>
+                            <th>Geek ID</th>
+                            <th>Item Cultural ID</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="avaliacao : ${avaliacoes}">
+                            <td th:text="${avaliacao.id}"></td>
+                            <td th:text="${avaliacao.nota}"></td>
+                            <td th:text="${avaliacao.texto}"></td>
+                            <td th:text="${avaliacao.geek.id}"></td>
+                            <td th:text="${avaliacao.itemCultural.id}"></td>
+                            <td>
+                                <a th:href="@{'/avaliacoes/' + ${avaliacao.id}}" class="btn btn-warning btn-sm">Editar</a>
+                                <a th:href="@{'/avaliacoes/' + ${avaliacao.id} + '/delete'}" class="btn btn-danger btn-sm">Excluir</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
