@@ -1,10 +1,14 @@
 package com.example.demo;
 
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import lombok.EqualsAndHashCode;
 
 @Entity
+@DiscriminatorValue("FILME")
+@EqualsAndHashCode(callSuper = true)
 public class Filme extends ItemCultural{
 
 	@Id @GeneratedValue

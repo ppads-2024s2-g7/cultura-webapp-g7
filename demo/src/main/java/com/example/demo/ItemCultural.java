@@ -1,14 +1,12 @@
 package com.example.demo;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.Table;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "itemculturaltype", discriminatorType = DiscriminatorType.STRING)
+@Data
 @Table(name = "item_cultural")
 public abstract class ItemCultural {
 
