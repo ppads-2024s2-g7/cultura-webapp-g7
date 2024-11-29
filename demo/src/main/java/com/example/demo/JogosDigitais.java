@@ -1,10 +1,15 @@
 package com.example.demo;
 
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import lombok.EqualsAndHashCode;
+
 
 @Entity
+@DiscriminatorValue("JOGOS")
+@EqualsAndHashCode(callSuper = true)
 public class JogosDigitais extends ItemCultural{
 
 	@Id @GeneratedValue

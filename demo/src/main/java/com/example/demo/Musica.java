@@ -1,8 +1,9 @@
 package com.example.demo;
-
 import jakarta.persistence.Entity;
 
 @Entity
+@DiscriminatorValue("MUSICA")
+@EqualsAndHashCode(callSuper = true)
 public class Musica extends ItemCultural {
 
     private String cantor;
