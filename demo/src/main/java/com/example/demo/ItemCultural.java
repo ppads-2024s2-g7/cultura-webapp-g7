@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @Table(name = "item_cultural")
 public abstract class ItemCultural {
-
+    
     @Id @GeneratedValue
     private long id;
 

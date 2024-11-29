@@ -1,45 +1,32 @@
 package com.example.demo;
-
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.EqualsAndHashCode;
-
 
 @Entity
 @DiscriminatorValue("MUSICA")
 @EqualsAndHashCode(callSuper = true)
 public class Musica extends ItemCultural {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String duracao;
+
     private String cantor;
     private String produtor;
-    private int anoLancamento;
+    private Integer anoLancamento;
+    private Integer duracao; // Duração da música em segundos (exemplo)
 
-    // Construtor vazio
-    public Musica() {}
-
+    // Construtor padrão
+    public Musica() {
+        super();  // Chama o construtor da classe ItemCultural
+    }
+    
     // Construtor com parâmetros
-    public Musica(String duracao, String cantor, String produtor, int anoLancamento) {
-        this.duracao = duracao;
+    public Musica(String nome, String cantor, String produtor, Integer anoLancamento, Integer duracao) {
+        super();  // Chama o construtor da classe ItemCultural
+        this.setNome(nome); // Usa o método da classe pai para setar o nome
         this.cantor = cantor;
         this.produtor = produtor;
         this.anoLancamento = anoLancamento;
-    }
-
-    public String getDuracao() {
-        return duracao;
-    }
-
-    public void setDuracao(String duracao) {
         this.duracao = duracao;
     }
 
+    // Getters e setters
     public String getCantor() {
         return cantor;
     }
@@ -56,11 +43,20 @@ public class Musica extends ItemCultural {
         this.produtor = produtor;
     }
 
-    public int getAnoLancamento() {
+    public Integer getAnoLancamento() {
         return anoLancamento;
     }
 
-    public void setAnoLancamento(int anoLancamento) {
+    public void setAnoLancamento(Integer anoLancamento) {
         this.anoLancamento = anoLancamento;
     }
+
+    public Integer getDuracao() {
+        return duracao;
+    }
+
+    public void setDuracao(Integer duracao) {
+        this.duracao = duracao;
+    }
+
 }
