@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gerenciamento de Geeks</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+</head>
+
+<body>
+    <h1>Gerenciamento de Geeks</h1>
+
+    <table id="tabelaFormulario">    
+        <tr> <td>ID:</td> <td><input type="text" id="txtId" disabled></td> </tr>
+        <tr> <td>Username:</td> <td><input type="text" id="txtUsername"></td> </tr>
+        <tr> <td>Email:</td> <td><input type="text" id="txtEmail"></td> </tr>
+        <tr><td></td><td>
+            <input type="button" value="Salvar" onclick="salvarGeek()" id="btnSalvar">
+            <input type="button" value="Apagar" onclick="apagarGeek()" id="btnApagar">
+            <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
+        </td></tr>
+    </table> 
+    
+    <p style="font-weight:bold" id="paragrafoMensagem"></p>
+    
+    <table id="tabelaGeeks">  
+        <tr><td><input type="button" value="Novo" onclick="novoGeek()" id="btnNovo"></td> <td></td> <td></td></tr>
+        <tr> <th>ID</th> <th>Username</th> <th>Email</th> </tr>
+        <tbody id="corpoTabelaGeeks"> </tbody>
+    </table>
+    
+    <script src="geek-rest.js"></script>
+    <script>
+        const tabelaGeeks = document.querySelector('#tabelaGeeks');
+        const tabelaFormulario = document.querySelector('#tabelaFormulario');
+        const corpoTabela = document.querySelector('#corpoTabelaGeeks');
+        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+        const txtId = document.querySelector('#txtId');
+        const txtUsername = document.querySelector('#txtUsername');
+        const txtEmail = document.querySelector('#txtEmail');
+        
+        const btnNovo = document.querySelector('#btnNovo');
+        const btnSalvar = document.querySelector('#btnSalvar');
+        const btnApagar = document.querySelector('#btnApagar');
+        const btnCancelar = document.querySelector('#btnCancelar');
+        var criandoNovoGeek = false;
+        
+        inicializar();
+
+        function inicializar() {
+            criandoNovoGeek = false;
+            paragrafoMensagem.textContent = 'Pressione o botão Novo ou selecione um geek da lista:';
+            txtId.value = '';
+            txtUsername.value = '';
+            txtEmail.value = '';
+            txtUsername.disabled = true;
+            txtEmail.disabled = true;
+            
+            btnNovo.disabled = false;
+            btnSalvar.disabled = true;
+            btnApagar.disabled = true;
+            btnCancelar.disabled = true;
+            
+            tabelaFormulario.style.display = 'none';
+            tabelaGeeks.style.display = 'inline';
+            
+            listarTodosGeeks();            
+        }
+
+        function listarTodosGeeks() {
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao listar geeks (código " + error.message + ")";
+            }
+            asyncLerGeeks(preencherTabela, errorHandler);
+        }
+        
+        function preencherTabela(geeks) {
+            corpoTabela.innerHTML = "";
+            geeks.forEach(g => {
+                let linha = corpoTabela.insertRow();
+                let celulaId = linha.insertCell();
+                let celulaUsername = linha.insertCell();
+                let celulaEmail = linha.insertCell();
+                
+                let alink = document.createElement('a');
+                alink.textContent = g.id;
+                alink.href = "javascript:void(0)";
+                alink.onclick = function() { selecionarGeek(g.id); };
+                celulaId.appendChild(alink);
+                celulaUsername.textContent = g.username;
+                celulaEmail.textContent = g.email;
+            });
+        }
+        
+        function selecionarGeek(id) {
+            criandoNovoGeek = false;
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = "Erro ao selecionar geek (código " + error.message + ")";
+            }
+            asyncLerGeekById(id, preencherFormulario, errorHandler);				
+        }
+            
+        function preencherFormulario(geek) {
+            paragrafoMensagem.textContent = 'Altere e salve os dados do geek, ou apague o registro.';
+            txtId.value = geek.id;
+            txtUsername.value = geek.username;
+            txtEmail.value = geek.email;
+            
+            txtUsername.disabled = false;
+            txtEmail.disabled = false;
+            
+            btnNovo.disabled = true;
+            btnSalvar.disabled = false;
+            btnApagar.disabled = false;
+            btnCancelar.disabled = false;  
+            
+            tabelaFormulario.style.display = 'inline';
+            tabelaGeeks.style.display = 'none';
+        }
+
+        function novoGeek() {
+            paragrafoMensagem.textContent = 'Preencha os dados do novo geek...';
+            criandoNovoGeek = true;
+            
+            txtId.value = '';
+            txtUsername.value = '';
+            txtEmail.value = '';
+            
+            txtUsername.disabled = false;
+            txtEmail.disabled = false;
+            
+            btnNovo.disabled = true;
+            btnSalvar.disabled = false;
+            btnApagar.disabled = true;
+            btnCancelar.disabled = false;
+            
+            tabelaFormulario.style.display = 'inline';
+            tabelaGeeks.style.display = 'none';
+        }
+        
+        function salvarGeek() {
+            if (criandoNovoGeek) {
+                criarGeek();
+            } else {
+                alterarGeek();
+            }
+        }
+        
+        function criarGeek() {
+            const dadosGeek = {
+                'username': txtUsername.value,
+                'email': txtEmail.value
+            };
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao criar novo geek (código ' + error.message + ')'; 
+            }
+            asyncCriarGeek(dadosGeek, inicializar, errorHandler);
+        }
+        
+        function alterarGeek() {
+            const dadosGeek = {
+                'id': parseInt(txtId.value, 10),
+                'username': txtUsername.value,
+                'email': txtEmail.value
+            };
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao alterar geek (código ' + error.message + ')'; 
+            }
+            asyncAlterarGeek(dadosGeek, inicializar, errorHandler);        	
+        }
+        
+        function cancelarEdicao() {
+            inicializar();
+        }
+        
+        function apagarGeek() {
+            const id = txtId.value;
+            const errorHandler = function(error) { 
+                paragrafoMensagem.textContent = 'Erro ao apagar geek (código ' + error.message + ')'; 
+            } 
+            asyncApagarGeek(id, inicializar, errorHandler);       		
+        }
+        
+    </script>    
+</body>
+
+</html>

@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "item_cultural")
 public abstract class ItemCultural {
-
+    
     @Id @GeneratedValue
     private long id;
 

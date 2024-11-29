@@ -1,45 +1,81 @@
-const URL_BASE = 'http://localhost:8080/desenhos';
-
-function asyncLerDesenhos(callbackSucesso, callbackErro) {
-    fetch(URL_BASE)
-        .then(response => response.json())
-        .then(callbackSucesso)
-        .catch(callbackErro);
-}
-
-function asyncLerDesenhoById(id, callbackSucesso, callbackErro) {
-    fetch(URL_BASE + '/' + id)
-        .then(response => response.json())
-        .then(callbackSucesso)
-        .catch(callbackErro);
-}
-
-function asyncCriarDesenho(dados, callbackSucesso, callbackErro) {
-    fetch(URL_BASE, {
+// Função para criar um novo desenho
+async function asyncCriarDesenho(dadosDesenho, proxsucesso, proxerro) {
+    const URL = '/api/desenhos';
+    const postRequest = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-    })
-    .then(response => response.json())
-    .then(callbackSucesso)
-    .catch(callbackErro);
+        body: JSON.stringify(dadosDesenho),
+        headers: { 'Content-Type': 'application/json' }
+    };
+    
+    try {
+        const resposta = await fetch(URL, postRequest);
+        if (!resposta.ok) throw new Error(resposta.status);
+        await resposta.json();
+        proxsucesso();
+    } catch (erro) {
+        proxerro(erro);
+    }
 }
 
-function asyncAlterarDesenho(dados, callbackSucesso, callbackErro) {
-    fetch(URL_BASE + '/' + dados.id, {
+// Função para ler todos os desenhos
+async function asyncLerDesenhos(proxsucesso, proxerro) {
+    const URL = '/api/desenhos';
+    
+    try {
+        const resposta = await fetch(URL);
+        if (!resposta.ok) throw new Error(resposta.status);
+        const jsonresponse = await resposta.json();
+        proxsucesso(jsonresponse);
+    } catch (erro) {
+        proxerro(erro);
+    }
+}
+
+// Função para ler um desenho específico por ID
+async function asyncLerDesenhoById(id, proxsucesso, proxerro) {
+    const URL = `/api/desenhos/${id}`;
+    
+    try {
+        const resposta = await fetch(URL);
+        if (!resposta.ok) throw new Error(resposta.status);
+        const jsonresponse = await resposta.json();
+        proxsucesso(jsonresponse);
+    } catch (erro) {
+        proxerro(erro);
+    }
+}
+
+// Função para alterar um desenho existente
+async function asyncAlterarDesenho(dadosDesenho, proxsucesso, proxerro) {
+    const URL = `/api/desenhos/${dadosDesenho.id}`;
+    const putRequest = {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-    })
-    .then(response => response.json())
-    .then(callbackSucesso)
-    .catch(callbackErro);
+        body: JSON.stringify(dadosDesenho),
+        headers: { 'Content-Type': 'application/json' }
+    };
+    
+    try {
+        const resposta = await fetch(URL, putRequest);
+        if (!resposta.ok) throw new Error(resposta.status);
+        await resposta.json();
+        proxsucesso();
+    } catch (erro) {
+        proxerro(erro);
+    }
 }
 
-function asyncApagarDesenho(id, callbackSucesso, callbackErro) {
-    fetch(URL_BASE + '/' + id, {
+// Função para apagar um desenho por ID
+async function asyncApagarDesenho(id, proxsucesso, proxerro) {
+    const URL = `/api/desenhos/${id}`;
+    const deleteRequest = {
         method: 'DELETE'
-    })
-    .then(callbackSucesso)
-    .catch(callbackErro);
+    };
+    
+    try {
+        const resposta = await fetch(URL, deleteRequest);
+        if (!resposta.ok) throw new Error(resposta.status);
+        proxsucesso();
+    } catch (erro) {
+        proxerro(erro);
+    }
 }
